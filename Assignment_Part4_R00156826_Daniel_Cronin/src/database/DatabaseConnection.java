@@ -12,8 +12,8 @@ import java.util.List;
 
 public class DatabaseConnection {
 	// JDBC driver name and database URL
-	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost/dentist";
+	static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+	static final String DB_URL = "jdbc:mysql://localhost/carbon_impact";
 
 	// Database credentials
 	static final String USER = "root";
@@ -26,7 +26,7 @@ public class DatabaseConnection {
 
 		try {
 			// STEP 2: Register JDBC driver
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 
 			// STEP 3: Open a connection
 			System.out.println("Connecting to database...");
