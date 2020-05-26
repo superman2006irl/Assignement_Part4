@@ -10,11 +10,12 @@ import java.util.ArrayList;
  * @author Daniel
  *
  */
-public class activitylist implements Serializable {
+@SuppressWarnings("serial")
+public class Activitylist implements Serializable {
 	
 	private ArrayList<Activity> activitylist;
 	
-	public activitylist() {
+	public Activitylist() {
 		
 		activitylist = new ArrayList<Activity>();
 	}

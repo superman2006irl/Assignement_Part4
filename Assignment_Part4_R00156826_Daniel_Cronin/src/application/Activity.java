@@ -3,6 +3,7 @@ package application;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+@SuppressWarnings("serial")
 public class Activity implements Serializable {
 	
 	private String week;
