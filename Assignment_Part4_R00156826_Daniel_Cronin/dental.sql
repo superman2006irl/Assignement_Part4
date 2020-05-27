@@ -43,6 +43,20 @@ INSERT INTO `login` (`ID`, `username`, `pass_word`, `last_login`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `activities`
+--
+
+CREATE TABLE `activities` (
+  `week` int(11) NOT NULL,
+  `date` varchar(100) NOT NULL,
+  `activity` varchar(1000) NOT NULL,
+  `points` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
+-- --------------------------------------------------------
+--
 -- Indexes for table `login`
 --
 ALTER TABLE `login`

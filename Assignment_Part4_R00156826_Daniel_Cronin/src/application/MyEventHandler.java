@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -32,7 +33,8 @@ public class MyEventHandler implements EventHandler<ActionEvent> {
 	@Override
 	public void handle(ActionEvent event) {
 
-		if (event.getSource() == controller.tabPane.pane3.tab3.summaryAct) {
+		System.out.println(event);
+		/*if (event.getSource() == controller.tabPane.pane3.tab3.summaryAct) {
 			String res = "Activity \t\t\t\t\tDate \tPoints \tWeek \n";
 
 			List<String> g = new ArrayList<String>();
@@ -93,7 +95,10 @@ public class MyEventHandler implements EventHandler<ActionEvent> {
 			}
 
 			controller.tabPane.pane3.tab3.textArea.setText(res);
-		} else if (event.getSource() == controller.tabPane.pane2.tab2.add) {
+			
+		} else*/
+		//String id = ((Node) event.getSource()).getId();
+		if (event.getSource() == controller.tabPane.pane2.tab2.add) {
 
 			if (controller.tabPane.pane2.tab2.points.getText().isEmpty()) {
 				controller.tabPane.pane2.tab2.root.add(controller.tabPane.pane2.tab2.errorMsg, 2, 2);
@@ -116,9 +121,9 @@ public class MyEventHandler implements EventHandler<ActionEvent> {
 							controller.tabPane.pane2.tab2.points.getText());
 					controller.list.add(activity);
 				}
-			}
+			
 
-		} else if (event.getSource() == controller.tabPane.pane2.tab2.remove) {
+		}/* else if (event.getSource() == controller.tabPane.pane2.tab2.remove) {
 
 			ObservableList<Activity> allActivities, selectedActivity;
 			allActivities = controller.tabPane.pane2.tab2.tableView.getItems();
@@ -205,7 +210,7 @@ public class MyEventHandler implements EventHandler<ActionEvent> {
 			window.setScene(scene);
 			window.showAndWait();
 
-		}
+		}*/
 	}
-
+	}
 }

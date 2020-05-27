@@ -75,7 +75,7 @@ public class DatabaseConnection {
 		// Statements allow to issue SQL queries to the database
 		stmt = conn.createStatement();
 		// Result set get the result of the SQL query
-		stmt.executeQuery(query);
+		stmt.executeUpdate(query);
 	}
 
 	// start close connections

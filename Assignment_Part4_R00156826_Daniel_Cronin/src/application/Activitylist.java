@@ -3,15 +3,13 @@
  */
 package application;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * @author Daniel
  *
  */
-@SuppressWarnings("serial")
-public class Activitylist implements Serializable {
+public class Activitylist {
 	
 	private ArrayList<Activity> activitylist;
 	

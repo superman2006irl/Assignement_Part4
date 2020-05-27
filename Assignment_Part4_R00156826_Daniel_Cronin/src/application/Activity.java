@@ -1,10 +1,8 @@
 package application;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 
-@SuppressWarnings("serial")
-public class Activity implements Serializable {
+public class Activity{
 	
 	private String week;
 	private LocalDate date;

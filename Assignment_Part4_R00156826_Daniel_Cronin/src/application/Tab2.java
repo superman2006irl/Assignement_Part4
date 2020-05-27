@@ -1,19 +1,31 @@
 package application;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
+import java.util.List;
 import java.util.Locale;
+
+import database.DatabaseConnection;
+import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class Tab2 extends GridPane {
 
@@ -54,6 +66,7 @@ public class Tab2 extends GridPane {
 		datePicker = new DatePicker();
 		points = new TextField();
 		add = new Button("Add");
+		add.setId("addButton");
 		remove = new Button("Remove");
 		listDis = new Button("List");
 		load = new Button("Load");
@@ -103,25 +116,130 @@ public class Tab2 extends GridPane {
 		root.add(listDis, 2, 4);
 
 		add.setOnAction(e -> {
-			controller.event.handle(e);
+			System.out.println(e);
+
+			if (points.getText().isEmpty()) {
+				root.add(errorMsg, 2, 2);
+				comboBox.setStyle("-fx-border-color: red;");
+			} else {
+				comboBox.setStyle("");
+				errorMsg.setVisible(false);
+
+				activity = new Activity(week.getText(), datePicker.getValue(),
+						comboBox.getSelectionModel().getSelectedItem().toString(), points.getText());
+				controller.list.add(activity);
+
+			}
+
 		});
 		remove.setOnAction(e -> {
-			controller.event.handle(e);
+			ObservableList<Activity> allActivities, selectedActivity;
+			allActivities = controller.tabPane.pane2.tab2.tableView.getItems();
+			selectedActivity = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedItems();
+			int selectedIndex = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedIndex();
+			controller.list.getActivitylist().remove(selectedIndex);
+			allActivities.removeAll(selectedActivity);
 		});
 		listDis.setOnAction(e -> {
-			controller.event.handle(e);
+			tableView.getItems().clear();
+
+			DatabaseConnection db = new DatabaseConnection();
+			db.makeConnection();
+			try {
+				List<List<String>> results = db.executeQueryForResults("select * from activities;");
+
+				for (List<String> Act : results) {
+					activity = new Activity(
+							Act.get(0), 
+							LocalDate.parse(Act.get(1)), 
+							Act.get(2), 
+							Act.get(3));
+					
+					controller.list.add(activity);
+				}
+
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+
+			for (Activity activity : controller.list.getActivitylist()) {
+				tableView.getItems().add(activity);
+			}
+
+			tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
 		});
 		comboBox.setOnAction(e -> {
-			controller.event.handle(e);
+			// controller.event.handle(e);
+			String selection = comboBox.getValue();
+
+			if (selection == "Walking 10 Points") {
+				points.setText("10");
+			} else if (selection == "Eating a 8oz Steak -10 Points") {
+				points.setText("-10");
+
+			} else if (selection == "Cycling 5 Points") {
+				points.setText("5");
+
+			} else if (selection == "Driving to work -5 Points") {
+				points.setText("-5");
+
+			} else if (selection == "Leisure drive 3 Points") {
+				points.setText("3");
+
+			} else if (selection == "Vegtarian for the day 7 Points") {
+				points.setText("7");
+
+			} else if (selection == "Cycling to work 7 Points") {
+				points.setText("7");
+			}
 		});
 		load.setOnAction(e -> {
 			controller.list = (Activitylist) FileReadWrite.readFromFile("control.ser");
 		});
 		save.setOnAction(e -> {
-			FileReadWrite.writeToFile("control.ser", controller.list);
+			saveListToDB(controller);
 		});
 		exit.setOnAction(e -> {
-			controller.event.handle(e);
+			Stage window = new Stage();
+			Label label = new Label();
+			Button saveButton = new Button("Save");
+			Button cancelButton = new Button("Cancel");
+			Button closeButton = new Button("Close without saving");
+			HBox layout = new HBox(10);
+			BorderPane borderPane = new BorderPane();
+
+			window.initModality(Modality.APPLICATION_MODAL);
+			window.setTitle("Save dialog");
+			window.setMinWidth(250);
+
+			label.setText("Would you like to save before exit");
+			saveButton.setOnAction(event -> {
+				saveListToDB(controller);
+				System.exit(0);
+			});
+			closeButton.setOnAction(event -> {
+
+				System.exit(0);
+			});
+
+			cancelButton.setOnAction(event ->
+
+			window.close());
+
+			// label.setLabelPadding(new Insets(10));
+			BorderPane.setAlignment(label, Pos.CENTER);
+
+			layout.getChildren().addAll(saveButton, closeButton, cancelButton);
+			layout.setAlignment(Pos.CENTER);
+
+			borderPane.setTop(label);
+			borderPane.setCenter(layout);
+
+			window.setResizable(true);
+			Scene scene = new Scene(borderPane, 300, 150);
+			window.setScene(scene);
+			window.showAndWait();
 		});
 
 	}
@@ -134,6 +252,33 @@ public class Tab2 extends GridPane {
 
 		week.setText(Integer.toString(weekOfYear1));
 
+	}
+	
+	public void saveListToDB(Controller controller) {
+		
+		DatabaseConnection db = new DatabaseConnection();
+		
+		db.makeConnection();
+		
+		for(Activity r : controller.list.getActivitylist()) {
+		
+		
+		String query = "INSERT INTO activities VALUES("+ Integer.parseInt(r.getWeek()) + ",'" + r.getDate().toString() 
+				+ "','" + r.getActivity() + "'," 
+				+Integer.parseInt(r.getPoints()) + ");"; 
+				
+				
+		try {
+			db.executeUpdate(query);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		}
+		db.closeConnection();
+		
+		
 	}
 
 }
