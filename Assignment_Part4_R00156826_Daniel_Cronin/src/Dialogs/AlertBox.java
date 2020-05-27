@@ -6,8 +6,9 @@ import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.geometry.*;
 
-public class AlertBox {//warning window
-
+public class AlertBox { 
+	
+	//warning window
 	public static void display(String title, String message) {
 		Stage window = new Stage();
 		// Block events to other windows
