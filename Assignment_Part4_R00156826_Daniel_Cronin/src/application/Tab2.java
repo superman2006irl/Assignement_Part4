@@ -27,26 +27,19 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Tab2 extends GridPane {
 
 	public Activity activity;
-	@SuppressWarnings("rawtypes")
 	public TableView tableView;
 	public ComboBox<String> comboBox;
 	public GridPane root;
 	public File h;
-	public TextField week;
+	public TextField week, points;
 	public DatePicker datePicker;
-	public TextField points;
-	public Button add;
-	public Button remove;
-	public Button listDis;
-	public Button load;
-	public Button save;
-	public Button exit;
+	public Button add, remove, button, listDis, load, save, exit;
 	public Label errorMsg;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Tab2(Controller controller) {
 
 		Label datelbl = new Label("Date----- ");
@@ -116,130 +109,27 @@ public class Tab2 extends GridPane {
 		root.add(listDis, 2, 4);
 
 		add.setOnAction(e -> {
-			System.out.println(e);
-
-			if (points.getText().isEmpty()) {
-				root.add(errorMsg, 2, 2);
-				comboBox.setStyle("-fx-border-color: red;");
-			} else {
-				comboBox.setStyle("");
-				errorMsg.setVisible(false);
-
-				activity = new Activity(week.getText(), datePicker.getValue(),
-						comboBox.getSelectionModel().getSelectedItem().toString(), points.getText());
-				controller.list.add(activity);
-
-			}
+			addToActivities(controller);
 
 		});
 		remove.setOnAction(e -> {
-			ObservableList<Activity> allActivities, selectedActivity;
-			allActivities = controller.tabPane.pane2.tab2.tableView.getItems();
-			selectedActivity = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedItems();
-			int selectedIndex = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedIndex();
-			controller.list.getActivitylist().remove(selectedIndex);
-			allActivities.removeAll(selectedActivity);
+			removefromScreen(controller);
 		});
 		listDis.setOnAction(e -> {
-			tableView.getItems().clear();
 
-			DatabaseConnection db = new DatabaseConnection();
-			db.makeConnection();
-			try {
-				List<List<String>> results = db.executeQueryForResults("select * from activities;");
-
-				for (List<String> Act : results) {
-					activity = new Activity(
-							Act.get(0), 
-							LocalDate.parse(Act.get(1)), 
-							Act.get(2), 
-							Act.get(3));
-					
-					controller.list.add(activity);
-				}
-
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-
-			for (Activity activity : controller.list.getActivitylist()) {
-				tableView.getItems().add(activity);
-			}
-
-			tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
+			displayOnScreen(controller);
 		});
 		comboBox.setOnAction(e -> {
-			// controller.event.handle(e);
-			String selection = comboBox.getValue();
-
-			if (selection == "Walking 10 Points") {
-				points.setText("10");
-			} else if (selection == "Eating a 8oz Steak -10 Points") {
-				points.setText("-10");
-
-			} else if (selection == "Cycling 5 Points") {
-				points.setText("5");
-
-			} else if (selection == "Driving to work -5 Points") {
-				points.setText("-5");
-
-			} else if (selection == "Leisure drive 3 Points") {
-				points.setText("3");
-
-			} else if (selection == "Vegtarian for the day 7 Points") {
-				points.setText("7");
-
-			} else if (selection == "Cycling to work 7 Points") {
-				points.setText("7");
-			}
+			comboSelection(controller);
 		});
 		load.setOnAction(e -> {
-			controller.list = (Activitylist) FileReadWrite.readFromFile("control.ser");
+			load(controller);
 		});
 		save.setOnAction(e -> {
 			saveListToDB(controller);
 		});
 		exit.setOnAction(e -> {
-			Stage window = new Stage();
-			Label label = new Label();
-			Button saveButton = new Button("Save");
-			Button cancelButton = new Button("Cancel");
-			Button closeButton = new Button("Close without saving");
-			HBox layout = new HBox(10);
-			BorderPane borderPane = new BorderPane();
-
-			window.initModality(Modality.APPLICATION_MODAL);
-			window.setTitle("Save dialog");
-			window.setMinWidth(250);
-
-			label.setText("Would you like to save before exit");
-			saveButton.setOnAction(event -> {
-				saveListToDB(controller);
-				System.exit(0);
-			});
-			closeButton.setOnAction(event -> {
-
-				System.exit(0);
-			});
-
-			cancelButton.setOnAction(event ->
-
-			window.close());
-
-			// label.setLabelPadding(new Insets(10));
-			BorderPane.setAlignment(label, Pos.CENTER);
-
-			layout.getChildren().addAll(saveButton, closeButton, cancelButton);
-			layout.setAlignment(Pos.CENTER);
-
-			borderPane.setTop(label);
-			borderPane.setCenter(layout);
-
-			window.setResizable(true);
-			Scene scene = new Scene(borderPane, 300, 150);
-			window.setScene(scene);
-			window.showAndWait();
+			exitOptions(controller);
 		});
 
 	}
@@ -253,32 +143,157 @@ public class Tab2 extends GridPane {
 		week.setText(Integer.toString(weekOfYear1));
 
 	}
-	
+
 	public void saveListToDB(Controller controller) {
-		
+
 		DatabaseConnection db = new DatabaseConnection();
-		
+
 		db.makeConnection();
-		
-		for(Activity r : controller.list.getActivitylist()) {
-		
-		
-		String query = "INSERT INTO activities VALUES("+ Integer.parseInt(r.getWeek()) + ",'" + r.getDate().toString() 
-				+ "','" + r.getActivity() + "'," 
-				+Integer.parseInt(r.getPoints()) + ");"; 
-				
-				
-		try {
-			db.executeUpdate(query);
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		
-		
+
+		for (Activity r : controller.list.getActivitylist()) {
+
+			if (r.getUploaded() == "No") {
+				r.setUploaded("Yes");
+				String query = "INSERT INTO activities VALUES(" + Integer.parseInt(Controller.getIDNumber()) + ","
+						+ Integer.parseInt(r.getWeek()) + ",'" + r.getDate().toString() + "','" + r.getActivity() + "',"
+						+ Integer.parseInt(r.getPoints()) + ",'" + r.getUploaded() + "'" + ");";
+
+				try {
+					db.executeUpdate(query);
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+
+			}
+
 		}
 		db.closeConnection();
-		
-		
 	}
 
+	public void addToActivities(Controller controller) {
+		if (points.getText().isEmpty()) {
+			root.add(errorMsg, 2, 2);
+			comboBox.setStyle("-fx-border-color: red;");
+		} else {
+			comboBox.setStyle("");
+			errorMsg.setVisible(false);
+
+			activity = new Activity(week.getText(), datePicker.getValue(),
+					comboBox.getSelectionModel().getSelectedItem().toString(), points.getText());
+			controller.list.add(activity);
+
+		}
+	}
+
+	public void removefromScreen(Controller controller) {
+		ObservableList<Activity> allActivities, selectedActivity;
+		allActivities = controller.tabPane.pane2.tab2.tableView.getItems();
+		selectedActivity = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedItems();
+		int selectedIndex = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedIndex();
+		controller.list.getActivitylist().remove(selectedIndex);
+		allActivities.removeAll(selectedActivity);
+	}
+
+	public void load(Controller controller) {
+		if (controller.loaded == "No") {
+			DatabaseConnection db = new DatabaseConnection();
+			db.makeConnection();
+			try {
+				List<List<String>> results = db.executeQueryForResults(
+						"select * from activities where ID =" + Integer.parseInt(Controller.getIDNumber()) + ";");
+
+				for (List<String> Act : results) {
+					activity = new Activity(Act.get(1), LocalDate.parse(Act.get(2)), Act.get(3), Act.get(4));
+					activity.setUploaded("Yes");
+					controller.list.add(activity);
+				}
+
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			controller.loaded = "Yes";
+		}
+	}
+
+	public void displayOnScreen(Controller controller) {
+		tableView.getItems().clear();
+
+		if (controller.loaded == "Yes") {
+			for (Activity activity : controller.list.getActivitylist()) {
+				tableView.getItems().add(activity);
+			}
+
+			tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		} else {
+			load(controller);
+			displayOnScreen(controller);
+		}
+	}
+
+	public void comboSelection(Controller controller) {
+		String selection = comboBox.getValue();
+
+		if (selection == "Walking 10 Points") {
+			points.setText("10");
+		} else if (selection == "Eating a 8oz Steak -10 Points") {
+			points.setText("-10");
+
+		} else if (selection == "Cycling 5 Points") {
+			points.setText("5");
+
+		} else if (selection == "Driving to work -5 Points") {
+			points.setText("-5");
+
+		} else if (selection == "Leisure drive 3 Points") {
+			points.setText("3");
+
+		} else if (selection == "Vegtarian for the day 7 Points") {
+			points.setText("7");
+
+		} else if (selection == "Cycling to work 7 Points") {
+			points.setText("7");
+		}
+	}
+
+	public void exitOptions(Controller controller) {
+		Stage window = new Stage();
+		Label label = new Label();
+		Button saveButton = new Button("Save");
+		Button cancelButton = new Button("Cancel");
+		Button closeButton = new Button("Close without saving");
+		HBox layout = new HBox(10);
+		BorderPane borderPane = new BorderPane();
+
+		window.initModality(Modality.APPLICATION_MODAL);
+		window.setTitle("Save dialog");
+		window.setMinWidth(250);
+
+		label.setText("Would you like to save before exit");
+		saveButton.setOnAction(event -> {
+			saveListToDB(controller);
+			System.exit(0);
+		});
+		closeButton.setOnAction(event -> {
+
+			System.exit(0);
+		});
+
+		cancelButton.setOnAction(event ->
+
+		window.close());
+
+		// label.setLabelPadding(new Insets(10));
+		BorderPane.setAlignment(label, Pos.CENTER);
+
+		layout.getChildren().addAll(saveButton, closeButton, cancelButton);
+		layout.setAlignment(Pos.CENTER);
+
+		borderPane.setTop(label);
+		borderPane.setCenter(layout);
+
+		window.setResizable(true);
+		Scene scene = new Scene(borderPane, 300, 150);
+		window.setScene(scene);
+		window.showAndWait();
+	}
 }

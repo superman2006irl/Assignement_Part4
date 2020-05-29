@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public Stage window;
+	public Controller controller;
 	TextField nameInput;
 	PasswordField passInput;
 	
@@ -42,13 +43,16 @@ public class Main extends Application {
 		GridPane.setConstraints(passInput, 1, 1);
 		
 		Button loginButton = new Button("login");
+		Button registerNewUser = new Button("Register New User");
 		
 		//use a lambda to handle what happens with the login
 		loginButton.setOnAction(e-> handleLogin());
+		registerNewUser.setOnAction(e-> handleNewUser());
 		GridPane.setConstraints(loginButton, 1, 2);
+		GridPane.setConstraints(registerNewUser, 1, 3);
 		
 		//add all elements to the scene
-		grid.getChildren().addAll(nameLabel, nameInput, passLabel, passInput, loginButton);
+		grid.getChildren().addAll(nameLabel, nameInput, passLabel, passInput, loginButton, registerNewUser);
 		
 		Scene scene = new Scene(grid, 300, 200);
 		window.setScene(scene);
@@ -79,6 +83,12 @@ public class Main extends Application {
 			window.show();
 		}
 		
+		
+	}
+	public void handleNewUser() {
+		
+		@SuppressWarnings("unused")
+		NewUser window = new NewUser(controller);
 		
 	}
 

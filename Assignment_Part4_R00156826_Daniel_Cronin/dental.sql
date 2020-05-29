@@ -47,10 +47,12 @@ INSERT INTO `login` (`ID`, `username`, `pass_word`, `last_login`) VALUES
 --
 
 CREATE TABLE `activities` (
+  `ID` int(11) NOT NULL,
   `week` int(11) NOT NULL,
   `date` varchar(100) NOT NULL,
   `activity` varchar(1000) NOT NULL,
-  `points` int(11) NOT NULL
+  `points` int(11) NOT NULL,
+  `uploaded` varchar(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
