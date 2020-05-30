@@ -59,6 +59,18 @@ CREATE TABLE `activities` (
 
 -- --------------------------------------------------------
 --
+-- Table structure for table `activitiesList`
+--
+
+CREATE TABLE `activitiesList` (
+  `ID` int(11) NOT NULL,
+  `activity` varchar(500) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+
+-- --------------------------------------------------------
+--
 -- Indexes for table `login`
 --
 ALTER TABLE `login`
