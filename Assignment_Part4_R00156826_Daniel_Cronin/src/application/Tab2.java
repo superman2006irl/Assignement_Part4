@@ -42,6 +42,7 @@ public class Tab2 extends GridPane {
 
 	public Tab2(Controller controller) {
 
+		//creates the layout for tab2(activities)
 		Label datelbl = new Label("Date----- ");
 		Text weeklbl = new Text("Week------- ");
 		Label activitylbl = new Label("Activity----- ");
@@ -108,6 +109,8 @@ public class Tab2 extends GridPane {
 		root.add(exit, 100, 9);
 		root.add(listDis, 2, 4);
 
+		
+		// call to whichever function is required
 		add.setOnAction(e -> {
 			addToActivities(controller);
 
@@ -134,6 +137,7 @@ public class Tab2 extends GridPane {
 
 	}
 
+	//function to format the date 
 	public void datePickerAction() {
 
 		LocalDate date1 = datePicker.getValue();
@@ -144,20 +148,31 @@ public class Tab2 extends GridPane {
 
 	}
 
+	//Adding to activities list does not save to database
+	//This function takes the contents of the ArrayList and saves to the database
 	public void saveListToDB(Controller controller) {
 
+		//create connection
 		DatabaseConnection db = new DatabaseConnection();
 
+		//Open a connection
 		db.makeConnection();
 
+		//Loop through list and create individual Activities 
 		for (Activity r : controller.list.getActivitylist()) {
 
+			//to prevent activities from uploading more than once
+			//Each Activity has a variable that checks if it has been uploaded
 			if (r.getUploaded() == "No") {
 				r.setUploaded("Yes");
+				
+				//create a prepared string to upload to database
 				String query = "INSERT INTO activities VALUES(" + Integer.parseInt(Controller.getIDNumber()) + ","
 						+ Integer.parseInt(r.getWeek()) + ",'" + r.getDate().toString() + "','" + r.getActivity() + "',"
 						+ Integer.parseInt(r.getPoints()) + ",'" + r.getUploaded() + "'" + ");";
 
+				//try catch to upload to the database, if it does not upload 
+				//prints the stack trace in order to narrow down the issue
 				try {
 					db.executeUpdate(query);
 				} catch (SQLException e1) {
@@ -167,13 +182,19 @@ public class Tab2 extends GridPane {
 			}
 
 		}
+		//close the connection
 		db.closeConnection();
 	}
 
+	//Function to create new Activities and add to list
 	public void addToActivities(Controller controller) {
+		//check if points text field is empty and print error if so
+		//prevents the program just crashing
 		if (points.getText().isEmpty()) {
 			root.add(errorMsg, 2, 2);
 			comboBox.setStyle("-fx-border-color: red;");
+			
+		//passes the above test so creates a new activity and adds to list
 		} else {
 			comboBox.setStyle("");
 			errorMsg.setVisible(false);
@@ -185,23 +206,56 @@ public class Tab2 extends GridPane {
 		}
 	}
 
+	//function to delete activity from screen and database
 	public void removefromScreen(Controller controller) {
+		
+		//using tableview i can get the selected index using an observable list
+		//then i can use that index to manipulate the display and the database
 		ObservableList<Activity> allActivities, selectedActivity;
-		allActivities = controller.tabPane.pane2.tab2.tableView.getItems();
-		selectedActivity = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedItems();
-		int selectedIndex = controller.tabPane.pane2.tab2.tableView.getSelectionModel().getSelectedIndex();
+		allActivities = tableView.getItems();
+		selectedActivity = tableView.getSelectionModel().getSelectedItems();
+		int selectedIndex = tableView.getSelectionModel().getSelectedIndex();
+		
+		//creating a new activity from the selected item, i use that to find it in my database 
+		//and delete it 
+		Activity selectedItem = controller.list.getActivitylist().get(selectedIndex);
 		controller.list.getActivitylist().remove(selectedIndex);
 		allActivities.removeAll(selectedActivity);
+		
+		
+		//create a connection and conntect
+		DatabaseConnection db = new DatabaseConnection();
+		db.makeConnection();
+		
+		try {
+			//update query with statement 
+			db.executeUpdate("delete from activities where ID =" + Controller.getIDNumber() +" and week =" 
+						+selectedItem.getWeek() +" and activity = '" 
+						+ selectedItem.getActivity()
+						+ "' and points =" + selectedItem.getPoints() + ";");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		//close connection
+		db.closeConnection();
 	}
 
+	//function to load stored items in the database to the Arraylist
 	public void load(Controller controller) {
+		//check to see if we have already loaded from the database
+		//if we havn't then we load 
 		if (controller.loaded == "No") {
+			
+			//create connection and connect
 			DatabaseConnection db = new DatabaseConnection();
 			db.makeConnection();
 			try {
+				//store the results that meet the criteria in a list
 				List<List<String>> results = db.executeQueryForResults(
-						"select * from activities where ID =" + Integer.parseInt(Controller.getIDNumber()) + ";");
+						"select * from activities where ID =" + Controller.getIDNumber() + ";");
 
+				//loop through that list and create new Activities.
+				//then add to the ArrayList
 				for (List<String> Act : results) {
 					activity = new Activity(Act.get(1), LocalDate.parse(Act.get(2)), Act.get(3), Act.get(4));
 					activity.setUploaded("Yes");
@@ -211,51 +265,75 @@ public class Tab2 extends GridPane {
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
+			//change the loaded variable to yes that we can't reload and duplicate data
 			controller.loaded = "Yes";
+			db.closeConnection();
 		}
 	}
 
+	//function to display the contents of the ArrayList on screen
 	public void displayOnScreen(Controller controller) {
+		
+		//clear the table view first
 		tableView.getItems().clear();
 
+		//check if we have loaded the database 
+		//if we have then we just load the contents of the list
 		if (controller.loaded == "Yes") {
 			for (Activity activity : controller.list.getActivitylist()) {
 				tableView.getItems().add(activity);
 			}
 
 			tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+			
+		//if not then we call the load function first and recall this function
 		} else {
 			load(controller);
 			displayOnScreen(controller);
 		}
 	}
 
+	//function to automatically fill a number in a box depending on the users choice
 	public void comboSelection(Controller controller) {
 		String selection = comboBox.getValue();
-
-		if (selection == "Walking 10 Points") {
+		
+		switch(selection) {
+		
+		case "Walking 10 Points":
 			points.setText("10");
-		} else if (selection == "Eating a 8oz Steak -10 Points") {
+			break;
+			
+		case "Eating a 8oz Steak -10 Points":
 			points.setText("-10");
-
-		} else if (selection == "Cycling 5 Points") {
+			break;
+			
+		case "Cycling 5 Points":
 			points.setText("5");
-
-		} else if (selection == "Driving to work -5 Points") {
+			break;
+			
+		case "Driving to work -5 Points":
 			points.setText("-5");
-
-		} else if (selection == "Leisure drive 3 Points") {
+			break;
+			
+		case "Leisure drive 3 Points":
 			points.setText("3");
-
-		} else if (selection == "Vegtarian for the day 7 Points") {
+			break;
+			
+		case "Vegtarian for the day 7 Points":
 			points.setText("7");
-
-		} else if (selection == "Cycling to work 7 Points") {
+			break;
+			
+		case "Cycling to work 7 Points":
 			points.setText("7");
+			break;
 		}
+				
 	}
 
+	//function to offer the user the chance to save before exiting 
 	public void exitOptions(Controller controller) {
+		
+		//creates a new window and populates 
 		Stage window = new Stage();
 		Label label = new Label();
 		Button saveButton = new Button("Save");
@@ -269,15 +347,21 @@ public class Tab2 extends GridPane {
 		window.setMinWidth(250);
 
 		label.setText("Would you like to save before exit");
+		
+		//if the user choices to save then the save function from above is called
+		//this will only save anything that has not been saved
 		saveButton.setOnAction(event -> {
 			saveListToDB(controller);
 			System.exit(0);
 		});
+		
+		//if the user choices not to save the system shuts down
 		closeButton.setOnAction(event -> {
 
 			System.exit(0);
 		});
 
+		//the user also has the choice to cancel and return to the previous window
 		cancelButton.setOnAction(event ->
 
 		window.close());

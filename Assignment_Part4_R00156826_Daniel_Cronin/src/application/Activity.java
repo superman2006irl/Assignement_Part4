@@ -2,6 +2,7 @@ package application;
 
 import java.time.LocalDate;
 
+//structure of the Activity 
 public class Activity{
 	
 	private String week;

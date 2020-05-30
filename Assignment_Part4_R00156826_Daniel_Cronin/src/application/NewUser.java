@@ -23,9 +23,10 @@ public class NewUser extends GridPane{
 	TextField nameInput;
 	GridPane grid;
 	
-	
+	//the class registers new users and saves the details to the database
 	public NewUser(Controller controller) {
 		
+		//creates the new user window
 		window = new Stage();
 		window.setTitle("Register new User");
 		
@@ -67,22 +68,29 @@ public class NewUser extends GridPane{
 		
 		
 	}
-	
+	//function to handle the user input
 	public void handle(Controller controller) {
 		
+		//create a new connection and connect
 		DatabaseConnection db = new DatabaseConnection();
 		db.makeConnection();
 		
 		try {
+			//create a list imported from the login database
+			//this database stores all the users details in plain text
+			//if this was a real database i would store a hash of the password by changing passInput to 
+			//HASHBYTES('SHA2_512'," + passInput.getText +")
 			List<List<String>> results = db.executeQueryForResults(
 					"select * from login where username = '" + nameInput.getText() + "' and pass_word = '" + passInput.getText() + "'");
 			
+			//like the login checked this just check if their is any results at all
+			//if so then a error is displayed 
 			if(results.size() >0) {
-				Label warning = new Label ("User and password combo\n"
-						+ " Already exists!!!");
+				Label warning = new Label ("User already exists!!!");
 				GridPane.setConstraints(warning, 1, 3);
 				grid.getChildren().add(warning);
 			}
+			//otherwise it saves the new user to the database
 			else {
 				db.executeUpdate("insert into login(username, pass_word) values('"
 						+nameInput.getText()+"','" +passInput.getText()+"');" );
@@ -92,6 +100,7 @@ public class NewUser extends GridPane{
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		//close connection
 		db.closeConnection();
 		
 	}

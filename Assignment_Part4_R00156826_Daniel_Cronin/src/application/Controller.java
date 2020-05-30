@@ -2,6 +2,8 @@ package application;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import Lists.Activitylist;
 import database.DatabaseConnection;
 import javafx.scene.layout.BorderPane;
 
