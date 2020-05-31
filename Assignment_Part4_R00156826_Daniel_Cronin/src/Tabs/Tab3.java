@@ -1,8 +1,12 @@
-package application;
+package Tabs;
 
 import java.util.ArrayList;
+import application.Controller;
 import java.util.Collections;
 import java.util.List;
+
+import application.Activity;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 

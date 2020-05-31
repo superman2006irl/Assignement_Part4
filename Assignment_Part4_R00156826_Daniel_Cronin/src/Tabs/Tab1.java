@@ -1,4 +1,4 @@
-package application;
+package Tabs;
 
 import javafx.scene.text.Text;
 

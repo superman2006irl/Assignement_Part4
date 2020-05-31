@@ -1,5 +1,7 @@
-package application;
+package Panes;
 
+import Tabs.Tab2;
+import application.Controller;
 import javafx.geometry.Insets;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;

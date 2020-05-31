@@ -1,4 +1,4 @@
-package application;
+package Tabs;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -6,7 +6,8 @@ import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.List;
 import java.util.Locale;
-
+import application.Activity;
+import application.Controller;
 import database.DatabaseConnection;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;

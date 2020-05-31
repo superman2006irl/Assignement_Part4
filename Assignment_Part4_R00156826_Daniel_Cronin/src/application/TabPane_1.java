@@ -1,6 +1,9 @@
 package application;
 
 
+import Panes.Pane;
+import Panes.Pane2;
+import Panes.Pane3;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
