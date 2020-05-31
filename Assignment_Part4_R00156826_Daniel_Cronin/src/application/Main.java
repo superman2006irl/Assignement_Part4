@@ -67,7 +67,7 @@ public class Main extends Application {
 		String username = nameInput.getText().toString();
 		String password = passInput.getText().toString();
 	
-		String title = "incorrect Login", message = "Username/Password combo incorrect";
+		String title = "incorrect Login", message = "Username/Password incorrect";
 		
 		//test if the checklogin function returns true. i.e. if the credentials appear in the database
 		if(!Controller.getInstance().checkLogin(username, password)) {

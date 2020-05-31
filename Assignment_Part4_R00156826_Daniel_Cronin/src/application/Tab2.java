@@ -326,10 +326,11 @@ public class Tab2 extends GridPane {
 		case "Cycling to work 7 Points":
 			points.setText("7");
 			break;
+			
 		}
 				
 	}
-
+	
 	//function to offer the user the chance to save before exiting 
 	public void exitOptions(Controller controller) {
 		

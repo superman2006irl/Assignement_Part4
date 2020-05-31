@@ -64,7 +64,8 @@ CREATE TABLE `activities` (
 
 CREATE TABLE `activitiesList` (
   `ID` int(11) NOT NULL,
-  `activity` varchar(500) NOT NULL
+  `activity` varchar(500) NOT NULL,
+  `points` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
